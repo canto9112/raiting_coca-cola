@@ -1,10 +1,9 @@
-from pprint import pprint
 import requests
 from dotenv import load_dotenv
 import os
 from itertools import count
 import datetime
-import time
+import plotly.graph_objects as go
 
 
 def get_posts(ask, token, version_api, count_post, start_time, end_time):
@@ -55,6 +54,22 @@ def get_timestemp_last_week(ask, service_token, version_api, count_post, week):
     return timestamp_last_week
 
 
+def get_graph(posts, ask):
+    dates = []
+    day_posts = []
+
+    last_week_posts = list(posts)
+    for day in last_week_posts:
+        date = day[0]
+        post = day[1]
+        dates.append(date)
+        day_posts.append(post)
+
+    fig = go.Figure([go.Bar(x=dates, y=day_posts)])
+    fig.update_layout(title_text=f'График упоминаний {ask} Вконтакте')
+    fig.show()
+
+
 if __name__ == "__main__":
     load_dotenv()
 
@@ -63,4 +78,6 @@ if __name__ == "__main__":
     count_post = 200
     week = 7
     ask = 'Coca-Cola'
-    pprint(get_timestemp_last_week(ask, service_token, version_api, count_post, week))
+
+    posts = get_timestemp_last_week(ask, service_token, version_api, count_post, week)
+    get_graph(posts, ask)
