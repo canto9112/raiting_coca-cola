@@ -61,6 +61,6 @@ if __name__ == "__main__":
     service_token = os.getenv('VK_SERVICE_TOKEN')
     version_api = '5.126'
     count_post = 200
-    week = 3
+    week = 7
     ask = 'Coca-Cola'
     pprint(get_timestemp_last_week(ask, service_token, version_api, count_post, week))
