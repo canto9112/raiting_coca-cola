@@ -2,32 +2,33 @@ from pprint import pprint
 import requests
 from dotenv import load_dotenv
 import os
+from itertools import count
+import datetime
 
 
-def get_first_page_posts(ask, token, version_api, posts_number,page_number):
+def get_posts(ask, token, version_api, count_post, start_time, end_time):
     base_url = 'https://api.vk.com/method/newsfeed.search'
-    params = {
-        'q': ask,
-        'count': posts_number,
-        'access_token': token,
-        'start_from': page_number,
-        'v': version_api}
-    response = requests.get(base_url, params=params)
-    response.raise_for_status()
-    response = response.json()
-    first_page_posts = []
-    for number in range(0, posts_number):
-        response_text = response['response']['items'][number]['text']
-        first_page_posts.append(response_text)
-    return first_page_posts
-
-
-def fetch_posts(page_number, ask, token, version_api, count_post):
     all_posts = []
-    for page in range(1, page_number):
-        posts = get_first_page_posts(ask, token, version_api, count_post, page)
-        all_posts.extend(posts)
-    return all_posts
+
+    for page in count(0, count_post):
+        params = {
+            'q': ask,
+            'count': count_post,
+            'access_token': token,
+            'start_time': start_time,
+            'end_time': end_time,
+            'start_from': page,
+            'v': version_api}
+        page_response = requests.get(base_url, params=params)
+        page_response.raise_for_status()
+        page_data = page_response.json()
+        if page >= page_data['response']['count']:
+            break
+        posts = page_data['response']['items']
+        for post in posts:
+            all_posts.append(post['text'])
+
+    print(len(all_posts))
 
 
 if __name__ == "__main__":
@@ -36,9 +37,14 @@ if __name__ == "__main__":
     service_token = os.getenv('VK_SERVICE_TOKEN')
     version_api = '5.126'
     count_post = 200
-    page_number = 6
+    start_time, end_time = 1613854800, 1613941200
 
-    ask = 'coca-cola'
-    all_posts = fetch_posts(page_number, ask, service_token, version_api, count_post)
-    print(len(all_posts))
+    ask = 'Coca-Cola'
+
+    get_posts(ask, service_token, version_api,
+              count_post, start_time, end_time)
+
+    today = datetime.date.today()
+    yesterday = today - datetime.timedelta(days=1)
+    print(yesterday)
 
