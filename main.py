@@ -39,6 +39,19 @@ def get_unix_timestamp(date):
     return int(timestamp_day)
 
 
+def get_timestemp_last_week(ask, service_token, version_api, count_post, week):
+    timestamp_last_week = []
+
+    for day in range(1, week + 1):
+        yesterday = today - datetime.timedelta(days=day)
+        timestamp_yestarday = get_unix_timestamp(yesterday)
+        posts_day = get_posts(ask, service_token, version_api,
+                              count_post, timestamp_yestarday, timestamp_today)
+        thistuple = tuple((yesterday, timestamp_yestarday, posts_day))
+        timestamp_last_week.append(thistuple)
+    return timestamp_last_week
+
+
 if __name__ == "__main__":
     load_dotenv()
 
@@ -50,15 +63,6 @@ if __name__ == "__main__":
     ask = 'Coca-Cola'
     today = datetime.date.today()
     timestamp_today = get_unix_timestamp(today)
-    week = 7
+    week = 2
 
-    timestamp_last_week = []
-    for day in range(1, week + 1):
-        yesterday = today - datetime.timedelta(days=day)
-        timestamp_yestarday = get_unix_timestamp(yesterday)
-
-        posts_day = get_posts(ask, service_token, version_api,
-                              count_post, timestamp_yestarday, timestamp_today)
-        thistuple = tuple((yesterday, timestamp_yestarday, posts_day))
-        timestamp_last_week.append(thistuple)
-    pprint(timestamp_last_week)
+    pprint(get_timestemp_last_week(ask, service_token, version_api, count_post, week))
