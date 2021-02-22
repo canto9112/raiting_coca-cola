@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 from itertools import count
 import datetime
+import time
 
 
 def get_posts(ask, token, version_api, count_post, start_time, end_time):
@@ -28,7 +29,7 @@ def get_posts(ask, token, version_api, count_post, start_time, end_time):
         for post in posts:
             all_posts.append(post['text'])
 
-    print(len(all_posts))
+    return len(all_posts)
 
 
 def get_unix_timestamp(date):
@@ -47,13 +48,17 @@ if __name__ == "__main__":
     start_time, end_time = 1613854800, 1613941200
 
     ask = 'Coca-Cola'
-
-    get_posts(ask, service_token, version_api,
-              count_post, start_time, end_time)
-
     today = datetime.date.today()
     timestamp_today = get_unix_timestamp(today)
-    yesterday = today - datetime.timedelta(days=1)
-    timestamp_yestarday = get_unix_timestamp(yesterday)
-    print(timestamp_today, timestamp_yestarday)
+    week = 7
 
+    timestamp_last_week = []
+    for day in range(1, week + 1):
+        yesterday = today - datetime.timedelta(days=day)
+        timestamp_yestarday = get_unix_timestamp(yesterday)
+
+        posts_day = get_posts(ask, service_token, version_api,
+                              count_post, timestamp_yestarday, timestamp_today)
+        thistuple = tuple((yesterday, timestamp_yestarday, posts_day))
+        timestamp_last_week.append(thistuple)
+    pprint(timestamp_last_week)
