@@ -31,6 +31,13 @@ def get_posts(ask, token, version_api, count_post, start_time, end_time):
     print(len(all_posts))
 
 
+def get_unix_timestamp(date):
+    timestamp_day = datetime.datetime(year=date.year,
+                                      month=date.month,
+                                      day=date.day).timestamp()
+    return int(timestamp_day)
+
+
 if __name__ == "__main__":
     load_dotenv()
 
@@ -45,6 +52,8 @@ if __name__ == "__main__":
               count_post, start_time, end_time)
 
     today = datetime.date.today()
+    timestamp_today = get_unix_timestamp(today)
     yesterday = today - datetime.timedelta(days=1)
-    print(yesterday)
+    timestamp_yestarday = get_unix_timestamp(yesterday)
+    print(timestamp_today, timestamp_yestarday)
 
