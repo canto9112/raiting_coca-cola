@@ -1,34 +1,22 @@
+import datetime
+import os
+
+import plotly.graph_objects as go
 import requests
 from dotenv import load_dotenv
-import os
-from itertools import count
-import datetime
-import plotly.graph_objects as go
 
 
-def get_posts(ask, token, version_api, count_post, start_time, end_time):
-    base_url = 'https://api.vk.com/method/newsfeed.search'
-    all_posts = []
-
-    for page in count(0, count_post):
-        params = {
-            'q': ask,
-            'count': count_post,
-            'access_token': token,
-            'start_time': start_time,
-            'end_time': end_time,
-            'start_from': page,
-            'v': version_api}
-        page_response = requests.get(base_url, params=params)
-        page_response.raise_for_status()
-        page_data = page_response.json()
-        if page >= page_data['response']['count']:
-            break
-        posts = page_data['response']['items']
-        for post in posts:
-            all_posts.append(post['text'])
-
-    return len(all_posts)
+def fetch_number_posts_per_day(url, query, token, version_api, start_time, end_time):
+    params = {
+        'q': query,
+        'access_token': token,
+        'start_time': start_time,
+        'end_time': end_time,
+        'v': version_api}
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+    response = response.json()
+    return response['response']['total_count']
 
 
 def get_unix_timestamp(date):
@@ -38,23 +26,34 @@ def get_unix_timestamp(date):
     return int(timestamp_day)
 
 
-def get_timestemp_last_week(ask, service_token, version_api, count_post, week):
-    timestamp_last_week = []
-
+def get_timestemp_past_days(days):
+    timestamp_past_days = []
     today = datetime.date.today()
-    timestamp_today = get_unix_timestamp(today)
+    for day in range(1, days):
+        start_day = today - datetime.timedelta(days=day)
+        end_day = start_day + datetime.timedelta(days=1)
+        timestamp_start_day = get_unix_timestamp(start_day)
+        timestamp_end_day = get_unix_timestamp(end_day)
+        timestamp_past_days.append(tuple((start_day,
+                                          timestamp_start_day,
+                                          timestamp_end_day)))
+    return timestamp_past_days
 
-    for day in range(1, week + 1):
-        yesterday = today - datetime.timedelta(days=day)
-        timestamp_yestarday = get_unix_timestamp(yesterday)
-        posts_day = get_posts(ask, service_token, version_api,
-                              count_post, timestamp_yestarday, timestamp_today)
-        thistuple = tuple((yesterday, posts_day))
-        timestamp_last_week.append(thistuple)
-    return timestamp_last_week
+
+def get_all_posts(days, base_url, search_query, service_token, version_api):
+    timestemp_past_days = get_timestemp_past_days(days)
+    all_posts = []
+    for day in timestemp_past_days:
+        yesterday = day[0]
+        start_day = day[1]
+        end_day = day[2]
+        per_day_posts = fetch_number_posts_per_day(base_url, search_query, service_token,
+                                                   version_api, start_day, end_day)
+        all_posts.append(tuple((yesterday, per_day_posts)))
+    return all_posts
 
 
-def get_graph(posts, ask):
+def get_graph(posts, ask, days):
     dates = []
     day_posts = []
 
@@ -66,18 +65,24 @@ def get_graph(posts, ask):
         day_posts.append(post)
 
     fig = go.Figure([go.Bar(x=dates, y=day_posts)])
-    fig.update_layout(title_text=f'График упоминаний {ask} Вконтакте')
+    fig.update_layout(title_text=f'График упоминаний {ask} за {days} дней Вконтакте')
     fig.show()
 
 
-if __name__ == "__main__":
+def main():
     load_dotenv()
 
     service_token = os.getenv('VK_SERVICE_TOKEN')
-    version_api = '5.126'
-    count_post = 200
-    week = 7
-    ask = 'Coca-Cola'
 
-    posts = get_timestemp_last_week(ask, service_token, version_api, count_post, week)
-    get_graph(posts, ask)
+    base_url = 'https://api.vk.com/method/newsfeed.search'
+    version_api = '5.126'
+    search_query = 'Coca-Cola'
+    days = 7
+
+    all_posts = get_all_posts(days, base_url, search_query, service_token, version_api)
+
+    get_graph(all_posts, search_query, days)
+
+
+if __name__ == "__main__":
+    main()
