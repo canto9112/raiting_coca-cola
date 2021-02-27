@@ -72,9 +72,9 @@ def main():
     search_query = 'Coca-Cola'
     days = 7
 
-    all_posts = get_all_posts(days, base_url, search_query, service_token, version_api)
+    posts = get_all_posts(days, base_url, search_query, service_token, version_api)
 
-    get_graph(all_posts, search_query, days)
+    get_graph(posts, search_query, days)
 
 
 if __name__ == "__main__":
