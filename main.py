@@ -42,12 +42,12 @@ def get_all_posts(days, base_url, search_query, service_token, version_api):
     timestemp_past_days = get_timestemp_past_days(days)
     all_posts = []
     for day in timestemp_past_days:
-        yesterday = day[0]
-        start_day = day[1]
-        end_day = day[2]
+        start_day = day[0]
+        timestamp_start_day = day[1]
+        timestamp_end_day = day[2]
         per_day_posts = fetch_number_posts_per_day(base_url, search_query, service_token,
-                                                   version_api, start_day, end_day)
-        all_posts.append((yesterday, per_day_posts))
+                                                   version_api, timestamp_start_day, timestamp_end_day)
+        all_posts.append((start_day, per_day_posts))
     return all_posts
 
 
