@@ -52,8 +52,7 @@ def get_graph(posts, ask, days):
     dates = []
     day_posts = []
 
-    last_week_posts = list(posts)
-    for date, post in last_week_posts:
+    for date, post in posts:
         dates.append(date)
         day_posts.append(post)
 
