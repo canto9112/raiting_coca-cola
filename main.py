@@ -41,10 +41,7 @@ def get_timestemp_past_days(days):
 def get_all_posts(days, base_url, search_query, service_token, version_api):
     timestemp_past_days = get_timestemp_past_days(days)
     all_posts = []
-    for day in timestemp_past_days:
-        start_day = day[0]
-        timestamp_start_day = day[1]
-        timestamp_end_day = day[2]
+    for start_day, timestamp_start_day, timestamp_end_day in timestemp_past_days:
         per_day_posts = fetch_number_posts_per_day(base_url, search_query, service_token,
                                                    version_api, timestamp_start_day, timestamp_end_day)
         all_posts.append((start_day, per_day_posts))
@@ -56,9 +53,7 @@ def get_graph(posts, ask, days):
     day_posts = []
 
     last_week_posts = list(posts)
-    for day in last_week_posts:
-        date = day[0]
-        post = day[1]
+    for date, post in last_week_posts:
         dates.append(date)
         day_posts.append(post)
 
