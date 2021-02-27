@@ -15,8 +15,8 @@ def fetch_number_posts_per_day(url, query, token, version_api, start_time, end_t
         'v': version_api}
     response = requests.get(url, params=params)
     response.raise_for_status()
-    response = response.json()
-    return response['response']['total_count']
+    search_result = response.json()
+    return search_result['response']['total_count']
 
 
 def get_unix_timestamp(date):
