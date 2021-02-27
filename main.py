@@ -34,9 +34,7 @@ def get_timestemp_past_days(days):
         end_day = start_day + datetime.timedelta(days=1)
         timestamp_start_day = get_unix_timestamp(start_day)
         timestamp_end_day = get_unix_timestamp(end_day)
-        timestamp_past_days.append(tuple((start_day,
-                                          timestamp_start_day,
-                                          timestamp_end_day)))
+        timestamp_past_days.append((start_day, timestamp_start_day, timestamp_end_day))
     return timestamp_past_days
 
 
@@ -49,7 +47,7 @@ def get_all_posts(days, base_url, search_query, service_token, version_api):
         end_day = day[2]
         per_day_posts = fetch_number_posts_per_day(base_url, search_query, service_token,
                                                    version_api, start_day, end_day)
-        all_posts.append(tuple((yesterday, per_day_posts)))
+        all_posts.append((yesterday, per_day_posts))
     return all_posts
 
 
